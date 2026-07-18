@@ -49,7 +49,7 @@ export default function Landing() {
             boxShadow: '0 8px 32px rgba(108,99,255,0.3), inset 0 1px 0 rgba(255,255,255,0.15)',
           }}
         >
-          <span style={{ fontSize: '1.4rem' }}>🎓</span>
+
           <span style={{
             fontSize: 'clamp(0.85rem, 2.5vw, 1.05rem)',
             fontWeight: 700,
@@ -108,7 +108,7 @@ export default function Landing() {
               backgroundSize: '200% 200%',
             }}
           >
-            ✨ Welcome — Get Started
+            Welcome — Get Started
           </button>
         </div>
 

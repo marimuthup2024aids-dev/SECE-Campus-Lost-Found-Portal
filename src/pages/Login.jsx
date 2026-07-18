@@ -10,7 +10,7 @@ const SECTIONS = ['A', 'B', 'C', 'D', 'E']
 
 export default function Login() {
   const navigate = useNavigate()
-  const { setUser, setIsAdmin } = useApp()
+  const { loginUser, setIsAdmin } = useApp()
   const [tab, setTab] = useState('student')
   const [student, setStudent] = useState({ name: '', rollno: '', year: '', dept: '', section: '' })
   const [admin, setAdmin] = useState({ name: '', password: '' })
@@ -23,8 +23,7 @@ export default function Login() {
       setError('Please fill all fields')
       return
     }
-    setUser(student)
-    setIsAdmin(false)
+    loginUser(student)
     navigate('/dashboard')
   }
 
@@ -90,13 +89,13 @@ export default function Login() {
 
           {error && (
             <div style={{ background: 'rgba(255,101,132,0.15)', border: '1px solid rgba(255,101,132,0.3)', borderRadius: '10px', padding: '10px 14px', marginBottom: '16px', color: '#ff6584', fontSize: '0.85rem' }}>
-              ⚠️ {error}
+              {error}
             </div>
           )}
 
           {tab === 'student' ? (
             <form onSubmit={handleStudent} style={{ animation: shake ? 'none' : undefined }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+              <div className="login-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
                 <div className="form-group" style={{ gridColumn: '1/-1' }}>
                   <label className="label">Full Name</label>
                   <input className="input" placeholder="Enter your name" value={student.name} onChange={e => setStudent({ ...student, name: e.target.value })} />
@@ -128,7 +127,7 @@ export default function Login() {
                 </div>
               </div>
               <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '8px', padding: '14px' }}>
-                🚀 Enter Portal
+                Enter Portal
               </button>
             </form>
           ) : (
@@ -142,7 +141,7 @@ export default function Login() {
                 <input className="input" type="password" placeholder="••••••••" value={admin.password} onChange={e => setAdmin({ ...admin, password: e.target.value })} />
               </div>
               <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '8px', padding: '14px' }}>
-                🔐 Admin Login
+                Admin Login
               </button>
             </form>
           )}

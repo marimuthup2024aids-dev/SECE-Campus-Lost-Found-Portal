@@ -4,201 +4,148 @@ import { useApp } from '../context/AppContext'
 import Navbar from '../components/Navbar'
 import Particles from '../components/Particles'
 import ClaimForm from '../components/ClaimForm'
-import { Search, MapPin, Calendar, Tag, Clock, CheckCircle, XCircle } from 'lucide-react'
-
-const CATEGORIES = ['All', 'Mobile', 'Laptop', 'Wallet', 'Bag', 'Electronics', 'Money', 'Keys', 'ID Card', 'Books', 'Other']
-const LOCATIONS = [
-  'All',
-  'AI Block - 1st Floor', 'AI Block - 2nd Floor', 'AI Block - 3rd Floor',
-  'DVE Lab', 'AI Lab', 'Robo Space', 'Synap Studio', 'Code Studio', 'ML Lab',
-  'Main Block - 1st Floor', 'Main Block - 2nd Floor', 'Main Block - 3rd Floor',
-  'IT Centre', 'Centre of Excellence', 'Central Library',
-  'HOD Room', 'Amenity Centre', 'Medical Centre',
-  'Main Ground', 'Football Ground', 'Volleyball Court',
-  'Outside Classroom Court', 'Mario',
-  'Hostel Block A', 'Hostel Block B', 'Hostel Block C', 'Hostel Block D', 'Hostel Block E',
-  'Outside Hostel Sitting Area', 'Others'
-]
-
-const ICONS = { Mobile: '📱', Laptop: '💻', Wallet: '👛', Bag: '🎒', Electronics: '🎧', Money: '💰', Keys: '🔑', 'ID Card': '🪪', Books: '📚', Other: '📦' }
-
-const STATUS_BADGE = {
-  pending:  { bg: 'rgba(245,158,11,0.2)',  color: '#f59e0b', icon: <Clock size={12} />,        label: 'Pending Verification' },
-  approved: { bg: 'rgba(67,233,123,0.2)',  color: '#43e97b', icon: <CheckCircle size={12} />,  label: 'Claim Approved ✅' },
-  rejected: { bg: 'rgba(255,101,132,0.2)', color: '#ff6584', icon: <XCircle size={12} />,      label: 'Claim Rejected' },
-}
+import { Search } from 'lucide-react'
 
 export default function LostThings() {
   const navigate = useNavigate()
-  const { user, items, claims, hasUserClaimed } = useApp()
+  const { user, items, claims } = useApp()
   const [search, setSearch] = useState('')
-  const [catFilter, setCatFilter] = useState('All')
-  const [locFilter, setLocFilter] = useState('All')
-  const [claimItem, setClaimItem] = useState(null) // item to claim
-  const [tab, setTab] = useState('browse') // 'browse' | 'myclaims'
+  const [claimItem, setClaimItem] = useState(null)
+  const [tab, setTab] = useState('browse')
 
   useEffect(() => { if (!user) navigate('/login') }, [user])
 
-  const filtered = items.filter(item => {
-    const matchSearch = item.name.toLowerCase().includes(search.toLowerCase()) ||
-      item.description.toLowerCase().includes(search.toLowerCase())
-    const matchCat = catFilter === 'All' || item.category === catFilter
-    const matchLoc = locFilter === 'All' || item.location === locFilter
-    return matchSearch && matchCat && matchLoc
-  })
+  const filtered = items.filter(item =>
+    item.name.toLowerCase().includes(search.toLowerCase())
+  )
 
   const myClaims = claims.filter(c =>
     c.claimantInfo.rollno === user?.rollno && c.claimantInfo.name === user?.name
   )
 
   const getItemClaim = (itemId) =>
-    claims.find(c => c.itemId === itemId && c.claimantInfo.rollno === user?.rollno && c.claimantInfo.name === user?.name)
+    claims.find(c => c.itemId === itemId && c.claimantInfo.rollno === user?.rollno)
+
+  const STATUS_COLOR = { pending: '#f59e0b', approved: '#43e97b', rejected: '#ff6584' }
+  const STATUS_LABEL = { pending: 'Pending', approved: 'Approved', rejected: 'Rejected' }
 
   return (
     <div style={{ minHeight: '100vh', position: 'relative', overflow: 'hidden' }}>
-      <div style={{ position: 'fixed', inset: 0, background: 'linear-gradient(135deg, #0f0c29 0%, #1e1b4b 50%, #0f172a 100%)' }} />
+      <div style={{
+        position: 'fixed', inset: 0,
+        backgroundImage: 'url(https://img.magnific.com/free-photo/surreal-neon-tropical-flowers_23-2151665817.jpg?semt=ais_hybrid&w=740&q=80)',
+        backgroundSize: 'cover', backgroundPosition: 'center',
+        filter: 'brightness(0.5)',
+      }} />
+      <div style={{ position: 'fixed', inset: 0, background: 'rgba(15,12,41,0.4)' }} />
       <Particles />
       <Navbar />
 
       {claimItem && <ClaimForm item={claimItem} onClose={() => setClaimItem(null)} />}
 
-      <div className="page" style={{ position: 'relative', zIndex: 10, padding: '100px 20px 60px' }}>
+      <div className="page" style={{ position: 'relative', zIndex: 10, padding: 'clamp(80px,10vw,100px) clamp(12px,4vw,20px) 60px' }}>
         <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
 
           <div className="animate-slide-up" style={{ textAlign: 'center', marginBottom: '32px' }}>
-            <div style={{ fontSize: '3rem', marginBottom: '12px' }}>😟</div>
-            <h1 style={{ fontSize: 'clamp(1.6rem, 4vw, 2.2rem)', fontWeight: 700, marginBottom: '8px' }}>
+            <h1 style={{ fontSize: 'clamp(1.6rem, 4vw, 2.2rem)', fontWeight: 700, marginBottom: '8px', textShadow: '0 2px 12px rgba(0,0,0,0.8)' }}>
               <span className="grad-text">Search Lost Items</span>
             </h1>
-            <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.9rem' }}>
+            <p style={{ color: 'rgba(255,255,255,0.85)', fontSize: '0.9rem', textShadow: '0 1px 6px rgba(0,0,0,0.7)' }}>
               Browse found items and submit a claim — admin will verify before returning
             </p>
           </div>
 
           {/* Tabs */}
           <div style={{ display: 'flex', gap: '8px', marginBottom: '28px', justifyContent: 'center' }}>
-            {[['browse', '🔍 Browse Items'], ['myclaims', `📋 My Claims ${myClaims.length > 0 ? `(${myClaims.length})` : ''}`]].map(([key, label]) => (
+            {[['browse', 'Browse Items'], ['myclaims', `My Claims${myClaims.length > 0 ? ` (${myClaims.length})` : ''}`]].map(([key, label]) => (
               <button key={key} onClick={() => setTab(key)} className="btn" style={{
                 padding: '10px 24px', fontSize: '0.9rem',
                 background: tab === key ? 'linear-gradient(135deg, #6c63ff, #a855f7)' : 'rgba(255,255,255,0.07)',
-                color: '#fff', border: tab === key ? 'none' : '1px solid rgba(255,255,255,0.1)',
+                color: '#fff', border: tab === key ? 'none' : '1px solid rgba(255,255,255,0.15)',
               }}>{label}</button>
             ))}
           </div>
 
-          {/* ── BROWSE TAB ── */}
+          {/* Browse Tab */}
           {tab === 'browse' && (
             <>
-              {/* Search & Filters */}
-              <div className="glass animate-slide-up" style={{ padding: '24px', marginBottom: '28px' }}>
-                <div style={{ position: 'relative', marginBottom: '16px' }}>
-                  <Search size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.4)' }} />
-                  <input className="input" placeholder="Search by item name or description..." value={search}
-                    onChange={e => setSearch(e.target.value)} style={{ paddingLeft: '46px', fontSize: '1rem' }} />
-                </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
-                  <div>
-                    <label className="label"><Tag size={12} style={{ marginRight: 4, verticalAlign: 'middle' }} />Category</label>
-                    <select className="input" value={catFilter} onChange={e => setCatFilter(e.target.value)}>
-                      {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="label"><MapPin size={12} style={{ marginRight: 4, verticalAlign: 'middle' }} />Location</label>
-                    <select className="input" value={locFilter} onChange={e => setLocFilter(e.target.value)}>
-                      {LOCATIONS.map(l => <option key={l} value={l}>{l}</option>)}
-                    </select>
-                  </div>
-                </div>
-              </div>
-
-              <div style={{ marginBottom: '20px', color: 'rgba(255,255,255,0.5)', fontSize: '0.9rem' }}>
-                Showing <span style={{ color: '#6c63ff', fontWeight: 600 }}>{filtered.length}</span> item{filtered.length !== 1 ? 's' : ''}
+              <div style={{ position: 'relative', marginBottom: '28px', maxWidth: '480px', margin: '0 auto 28px' }}>
+                <Search size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.4)' }} />
+                <input className="input" placeholder="Search item name..." value={search}
+                  onChange={e => setSearch(e.target.value)} style={{ paddingLeft: '46px', fontSize: '1rem' }} />
               </div>
 
               {filtered.length === 0 ? (
                 <div className="glass" style={{ padding: '60px', textAlign: 'center' }}>
-                  <div style={{ fontSize: '4rem', marginBottom: '16px' }}>🔍</div>
                   <h3 style={{ color: 'rgba(255,255,255,0.6)', fontWeight: 500 }}>No items found</h3>
                 </div>
               ) : (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
+                <div className="lost-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '20px' }}>
                   {filtered.map((item, i) => {
                     const myClaim = getItemClaim(item.id)
                     const alreadyClaimed = !!myClaim
                     const isReturned = item.returned
-
                     return (
                       <div key={item.id} className="glass" style={{
                         overflow: 'hidden', transition: 'all 0.3s',
-                        animation: `slideUp 0.5s ease ${i * 0.05}s both`,
-                        opacity: isReturned ? 0.55 : 1,
+                        animation: `slideUp 0.4s ease ${i * 0.04}s both`,
+                        opacity: isReturned ? 0.75 : 1,
+                        cursor: isReturned || alreadyClaimed ? 'default' : 'pointer',
                       }}
-                        onMouseEnter={e => { if (!isReturned) { e.currentTarget.style.transform = 'translateY(-6px)'; e.currentTarget.style.boxShadow = '0 20px 40px rgba(108,99,255,0.2)' } }}
+                        onMouseEnter={e => { if (!isReturned) { e.currentTarget.style.transform = 'translateY(-6px)'; e.currentTarget.style.boxShadow = '0 16px 40px rgba(108,99,255,0.25)' } }}
                         onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}
                       >
-                        {/* Photo */}
-                        <div style={{
-                          height: '160px',
-                          background: item.photo ? 'none' : 'linear-gradient(135deg, rgba(108,99,255,0.2), rgba(255,101,132,0.1))',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          position: 'relative', overflow: 'hidden',
-                        }}>
+                        {/* Image */}
+                        <div style={{ height: '180px', position: 'relative', overflow: 'hidden', background: 'rgba(108,99,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                           {item.photo
                             ? <img src={item.photo} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                            : <span style={{ fontSize: '4rem' }}>{ICONS[item.category] || '📦'}</span>}
+                            : <span style={{ fontSize: '3.5rem', opacity: 0.4 }}>?</span>}
                           {isReturned && (
-                            <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.65)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                              <span style={{ background: '#43e97b', color: '#0f0c29', padding: '6px 16px', borderRadius: '20px', fontWeight: 700, fontSize: '0.85rem' }}>✅ RETURNED</span>
+                            <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.65)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '12px' }}>
+                              <span style={{ background: '#43e97b', color: '#0f0c29', padding: '5px 14px', borderRadius: '20px', fontWeight: 700, fontSize: '0.8rem' }}>RETURNED</span>
+                              {item.approvedClaimantName && (
+                                <span style={{ color: 'rgba(255,255,255,0.9)', fontSize: '0.72rem', fontWeight: 600, textAlign: 'center', textShadow: '0 1px 4px rgba(0,0,0,0.8)' }}>
+                                  {item.approvedClaimantName}
+                                </span>
+                              )}
                             </div>
                           )}
-                          <div style={{ position: 'absolute', top: '10px', left: '10px', background: 'rgba(108,99,255,0.85)', padding: '4px 10px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 600 }}>
-                            {item.category}
-                          </div>
                         </div>
 
-                        <div style={{ padding: '20px' }}>
-                          <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '8px' }}>{item.name}</h3>
-                          <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '0.85rem', lineHeight: 1.5, marginBottom: '12px' }}>
-                            {item.description}
-                          </p>
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', marginBottom: '14px' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'rgba(255,255,255,0.5)', fontSize: '0.8rem' }}>
-                              <MapPin size={12} color="#6c63ff" /> {item.location}
-                            </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'rgba(255,255,255,0.5)', fontSize: '0.8rem' }}>
-                              <Calendar size={12} color="#ff6584" /> {item.date}
-                            </div>
-                          </div>
+                        {/* Name + Button */}
+                        <div style={{ padding: '14px 16px' }}>
+                          <h3 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: '8px', textAlign: 'center' }}>{item.name}</h3>
 
-                          {/* Claim status badge if already claimed by this user */}
-                          {alreadyClaimed && myClaim && (
+                          {/* Returned-to info — visible to ALL users */}
+                          {isReturned && item.approvedClaimantName && (
                             <div style={{
-                              display: 'flex', alignItems: 'center', gap: '6px',
-                              padding: '8px 12px', borderRadius: '10px', marginBottom: '10px',
-                              background: STATUS_BADGE[myClaim.status].bg,
-                              color: STATUS_BADGE[myClaim.status].color,
-                              fontSize: '0.82rem', fontWeight: 600,
+                              background: 'rgba(67,233,123,0.1)', border: '1px solid rgba(67,233,123,0.25)',
+                              borderRadius: '10px', padding: '8px 12px', marginBottom: '10px', textAlign: 'center',
                             }}>
-                              {STATUS_BADGE[myClaim.status].icon}
-                              {STATUS_BADGE[myClaim.status].label}
+                              <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.5)', marginBottom: '3px' }}>Returned to</div>
+                              <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#43e97b' }}>{item.approvedClaimantName}</div>
+                              <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.5)' }}>{item.approvedClaimantRollno}</div>
+                            </div>
+                          )}
+
+                          {alreadyClaimed && myClaim && !isReturned && (
+                            <div style={{ textAlign: 'center', marginBottom: '8px', fontSize: '0.78rem', fontWeight: 600, color: STATUS_COLOR[myClaim.status] }}>
+                              {STATUS_LABEL[myClaim.status]}
                             </div>
                           )}
 
                           <button
                             className="btn btn-primary"
                             style={{
-                              width: '100%', padding: '10px', fontSize: '0.9rem',
+                              width: '100%', padding: '9px', fontSize: '0.85rem',
                               opacity: alreadyClaimed || isReturned ? 0.5 : 1,
                               cursor: alreadyClaimed || isReturned ? 'not-allowed' : 'pointer',
-                              background: alreadyClaimed ? 'rgba(255,255,255,0.1)' : undefined,
+                              background: alreadyClaimed ? 'rgba(255,255,255,0.08)' : undefined,
                             }}
                             disabled={alreadyClaimed || isReturned}
                             onClick={() => !alreadyClaimed && !isReturned && setClaimItem(item)}
                           >
-                            {isReturned ? '✅ Item Returned'
-                              : alreadyClaimed ? '📋 Claim Submitted'
-                              : '🙋 Claim This Item'}
+                            {isReturned ? 'Returned' : alreadyClaimed ? 'Claimed' : 'Claim This Item'}
                           </button>
                         </div>
                       </div>
@@ -209,55 +156,41 @@ export default function LostThings() {
             </>
           )}
 
-          {/* ── MY CLAIMS TAB ── */}
+          {/* My Claims Tab */}
           {tab === 'myclaims' && (
             <div className="animate-fade-in">
               {myClaims.length === 0 ? (
                 <div className="glass" style={{ padding: '60px', textAlign: 'center' }}>
-                  <div style={{ fontSize: '4rem', marginBottom: '16px' }}>📋</div>
-                  <h3 style={{ color: 'rgba(255,255,255,0.6)', fontWeight: 500 }}>You haven't submitted any claims yet</h3>
-                  <button className="btn btn-primary" style={{ marginTop: '20px' }} onClick={() => setTab('browse')}>
-                    Browse Items
-                  </button>
+                  <h3 style={{ color: 'rgba(255,255,255,0.6)', fontWeight: 500 }}>No claims yet</h3>
+                  <button className="btn btn-primary" style={{ marginTop: '20px' }} onClick={() => setTab('browse')}>Browse Items</button>
                 </div>
               ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                   {myClaims.map(claim => {
-                    const s = STATUS_BADGE[claim.status]
+                    const color = STATUS_COLOR[claim.status]
+                    const bg = claim.status === 'approved' ? 'rgba(67,233,123,0.1)' : claim.status === 'rejected' ? 'rgba(255,101,132,0.1)' : 'rgba(245,158,11,0.1)'
+                    const approvedItem = items.find(i => i.id === claim.itemId)
                     return (
-                      <div key={claim.id} className="glass" style={{ padding: '24px', display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'flex-start' }}>
-                        <div style={{ width: '60px', height: '60px', borderRadius: '12px', overflow: 'hidden', background: 'rgba(108,99,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                          {claim.itemPhoto
-                            ? <img src={claim.itemPhoto} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                            : <span style={{ fontSize: '1.8rem' }}>📦</span>}
+                      <div key={claim.id} className="glass" style={{ padding: '20px', display: 'flex', gap: '14px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
+                        <div style={{ width: '56px', height: '56px', borderRadius: '10px', overflow: 'hidden', background: 'rgba(108,99,255,0.2)', flexShrink: 0 }}>
+                          {claim.itemPhoto ? <img src={claim.itemPhoto} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : null}
                         </div>
-                        <div style={{ flex: 1, minWidth: '200px' }}>
-                          <div style={{ fontWeight: 700, fontSize: '1.05rem', marginBottom: '4px' }}>{claim.itemName}</div>
-                          <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.45)', marginBottom: '10px' }}>
-                            {claim.itemCategory} • Submitted: {claim.submittedAt}
-                          </div>
-                          <div style={{
-                            display: 'inline-flex', alignItems: 'center', gap: '6px',
-                            padding: '6px 14px', borderRadius: '20px',
-                            background: s.bg, color: s.color,
-                            fontSize: '0.82rem', fontWeight: 700,
-                          }}>
-                            {s.icon} {s.label}
-                          </div>
+                        <div style={{ flex: 1, minWidth: '160px' }}>
+                          <div style={{ fontWeight: 700, marginBottom: '4px' }}>{claim.itemName}</div>
+                          <div style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.45)', marginBottom: '10px' }}>Submitted: {claim.submittedAt}</div>
+                          <span style={{ padding: '5px 14px', borderRadius: '20px', fontSize: '0.78rem', fontWeight: 700, background: bg, color }}>{STATUS_LABEL[claim.status]}</span>
                           {claim.status === 'approved' && (
                             <div style={{ marginTop: '12px', background: 'rgba(67,233,123,0.1)', border: '1px solid rgba(67,233,123,0.25)', borderRadius: '10px', padding: '12px 14px' }}>
-                              <p style={{ color: '#43e97b', fontWeight: 600, fontSize: '0.88rem', marginBottom: '4px' }}>🎉 Your claim is approved!</p>
-                              <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '0.82rem' }}>
-                                Please visit the admin office with your college ID to collect your item.
-                              </p>
+                              <div style={{ color: '#43e97b', fontWeight: 700, fontSize: '0.88rem', marginBottom: '4px' }}>Your claim is approved!</div>
+                              <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.82rem' }}>Visit the admin office with your college ID to collect your item.</div>
                             </div>
                           )}
-                          {claim.status === 'rejected' && (
-                            <div style={{ marginTop: '12px', background: 'rgba(255,101,132,0.1)', border: '1px solid rgba(255,101,132,0.25)', borderRadius: '10px', padding: '12px 14px' }}>
-                              <p style={{ color: '#ff6584', fontWeight: 600, fontSize: '0.88rem', marginBottom: '4px' }}>❌ Claim not approved</p>
-                              <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '0.82rem' }}>
-                                Your claim was rejected. If you believe this is a mistake, contact the admin directly.
-                              </p>
+                          {claim.status === 'rejected' && approvedItem?.approvedClaimantName && (
+                            <div style={{ marginTop: '12px', background: 'rgba(255,101,132,0.08)', border: '1px solid rgba(255,101,132,0.2)', borderRadius: '10px', padding: '12px 14px' }}>
+                              <div style={{ color: '#ff6584', fontWeight: 700, fontSize: '0.85rem', marginBottom: '6px' }}>Claim not approved</div>
+                              <div style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.5)', marginBottom: '4px' }}>This item was returned to:</div>
+                              <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#fff' }}>{approvedItem.approvedClaimantName}</div>
+                              <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.45)' }}>{approvedItem.approvedClaimantRollno}</div>
                             </div>
                           )}
                         </div>
