@@ -17,13 +17,13 @@ export default function Login() {
   const [error, setError] = useState('')
   const [shake, setShake] = useState(false)
 
-  const handleStudent = (e) => {
+  const handleStudent = async (e) => {
     e.preventDefault()
     if (!student.name || !student.rollno || !student.year || !student.dept || !student.section) {
       setError('Please fill all fields')
       return
     }
-    loginUser(student)
+    await loginUser(student)
     navigate('/dashboard')
   }
 
