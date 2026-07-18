@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react'
 
 const AppContext = createContext()
-const API = 'http://localhost:5000/api'
+const API = import.meta.env.VITE_API_URL || 'https://sece-campus-lost-found-portal.onrender.com/api'
 
 export function AppProvider({ children }) {
   const [user, setUser] = useState(null)

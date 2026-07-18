@@ -10,7 +10,7 @@ const SECTIONS = ['A', 'B', 'C', 'D', 'E']
 
 export default function Login() {
   const navigate = useNavigate()
-  const { loginUser, setIsAdmin } = useApp()
+  const { loginUser, setIsAdmin, setUser } = useApp()
   const [tab, setTab] = useState('student')
   const [student, setStudent] = useState({ name: '', rollno: '', year: '', dept: '', section: '' })
   const [admin, setAdmin] = useState({ name: '', password: '' })
